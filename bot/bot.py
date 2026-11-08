@@ -36,8 +36,32 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                  (tg_id, update.effective_user.username, update.effective_user.first_name))
     conn.commit()
     conn.close()
-    kb = [[InlineKeyboardButton("Открыть маркет", web_app=WebAppInfo(url=WEBAPP_URL))]]
-    await update.message.reply_text("Добро пожаловать в Playerok!", reply_markup=InlineKeyboardMarkup(kb))
+    kb = [[InlineKeyboardButton("🛍 Открыть маркет", web_app=WebAppInfo(url=WEBAPP_URL))],
+          [InlineKeyboardButton("⚙️ Админ-панель", web_app=WebAppInfo(url=WEBAPP_URL.replace('index.html','admin.html') if 'index.html' in WEBAPP_URL else WEBAPP_URL.rstrip('/') + '/admin.html'))]]
+    photo_url = "https://via.placeholder.com/400x200/1453ff/ffffff?text=Playerok"
+    await update.message.reply_photo(photo=photo_url,
+        caption="Добро пожаловать в Playerok! 🎮\n\nМаркетплейс игровых товаров и услуг.\nПополняй баланс, покупай и продавай товары, приглашай друзей.",
+        reply_markup=InlineKeyboardMarkup(kb))
+
+async def addadmin(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id not in ADMIN_IDS:
+        await update.message.reply_text("Доступ запрещён.")
+        return
+    if not context.args:
+        await update.message.reply_text("Использование: /addadmin <tg_id>")
+        return
+    try:
+        new_id = int(context.args[0])
+    except ValueError:
+        await update.message.reply_text("tg_id должен быть числом.")
+        return
+    if new_id not in ADMIN_IDS:
+        ADMIN_IDS.append(new_id)
+    conn = sqlite3.connect(DB)
+    conn.execute("INSERT OR IGNORE INTO users(tg_id) VALUES(?)", (new_id,))
+    conn.commit()
+    conn.close()
+    await update.message.reply_text(f"Админ {new_id} добавлен.")
 
 async def terms(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn = sqlite3.connect(DB)
@@ -100,6 +124,7 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("terms", terms))
     app.add_handler(CommandHandler("topups", topups))
+    app.add_handler(CommandHandler("addadmin", addadmin))
     app.add_handler(CallbackQueryHandler(on_callback))
     app.run_polling()
 
