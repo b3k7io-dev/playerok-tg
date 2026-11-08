@@ -1,0 +1,4 @@
+bot/.env
+bot/playerok.db
+bot/__pycache__/
+*.pyc
