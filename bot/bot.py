@@ -1,7 +1,8 @@
 import os
 import sqlite3
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram import LabeledPrice, Update
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, PreCheckoutQueryHandler, MessageHandler, filters
 
 BOT_TOKEN = os.getenv("BOT_TOKEN", "YOUR_BOT_TOKEN")
 WEBAPP_URL = os.getenv("WEBAPP_URL", "https://b3k7io-dev.github.io/playerok-tg/")
@@ -28,9 +29,27 @@ def init_db():
     conn.commit()
     conn.close()
 
+async def stars_invoice(update: Update, context: ContextTypes.DEFAULT_TYPE, amount: int = 100):
+    await context.bot.send_invoice(
+        chat_id=update.effective_chat.id,
+        title="Пополнение баланса",
+        description="Пополнение через Telegram Stars",
+        payload=f"stars_topup_{amount}",
+        provider_token="",
+        currency="XTR",
+        prices=[LabeledPrice("Stars", amount)],
+    )
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     tg_id = update.effective_user.id
     init_db()
+    if context.args and context.args[0].startswith("stars_"):
+        try:
+            amount = int(context.args[0].split("_")[1])
+            await stars_invoice(update, context, amount)
+            return
+        except Exception:
+            pass
     conn = sqlite3.connect(DB)
     conn.execute("INSERT OR IGNORE INTO users(tg_id,username,first_name) VALUES(?,?,?)",
                  (tg_id, update.effective_user.username, update.effective_user.first_name))
@@ -118,10 +137,22 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(chat_id=row[0], text="Заявка на пополнение отклонена. Обратитесь в поддержку.")
         await q.edit_message_text(f"Заявка #{rid} отклонена.")
 
+async def on_successful_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    tg_id = update.effective_user.id
+    amount = update.message.successful_payment.total_amount
+    conn = sqlite3.connect(DB)
+    conn.execute("UPDATE users SET balance = balance + ? WHERE tg_id=?", (amount, tg_id))
+    conn.commit()
+    conn.close()
+    await update.message.reply_text(f"Баланс пополнен на {amount} ⭐!")
+
 def main():
     init_db()
     app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("stars", lambda u, c: stars_invoice(u, c, 100)))
+    app.add_handler(PreCheckoutQueryHandler(lambda u, c: u.pre_checkout_query.answer(ok=True)))
+    app.add_handler(MessageHandler(filters.SUCCESSFUL_PAYMENT, on_successful_payment))
     app.add_handler(CommandHandler("terms", terms))
     app.add_handler(CommandHandler("topups", topups))
     app.add_handler(CommandHandler("addadmin", addadmin))
