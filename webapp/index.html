@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Playerok — маркетплейс</title>
+<link rel="stylesheet" href="css/app.css">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="topbar"><h1 id="title">Playerok</h1></div>
+  <div class="content" id="content"></div>
+  <nav class="bottomnav" id="nav">
+    <button data-tab="catalog" class="active"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Каталог</span></button>
+    <button data-tab="chats"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Чаты</span></button>
+    <button data-tab="profile"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Профиль</span></button>
+    <button data-tab="support"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>Поддержка</span></button>
+  </nav>
+</div>
+
+<!-- Product modal -->
+<div class="modal hidden" id="productModal">
+  <div class="box" id="productBox"></div>
+</div>
+
+<!-- Topup modal -->
+<div class="modal hidden" id="topupModal">
+  <div class="box">
+    <h2>Пополнение баланса</h2>
+    <div id="topupMsg"></div>
+    <button class="btn secondary" style="margin-top:12px" onclick="document.getElementById('topupModal').classList.add('hidden')">Закрыть</button>
+  </div>
+</div>
+
+<!-- Withdraw modal -->
+<div class="modal hidden" id="withdrawModal">
+  <div class="box">
+    <h2>Вывод средств</h2>
+    <div id="withdrawMsg"></div>
+    <button class="btn secondary" style="margin-top:12px" onclick="document.getElementById('withdrawModal').classList.add('hidden')">Закрыть</button>
+  </div>
+</div>
+
+
+<script src="js/app.js"></script>
+</body>
+</html>
