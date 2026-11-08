@@ -4,7 +4,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppI
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
 BOT_TOKEN = os.getenv("BOT_TOKEN", "YOUR_BOT_TOKEN")
-WEBAPP_URL = os.getenv("WEBAPP_URL", "https://yourname.github.io/playerok-tg/")
+WEBAPP_URL = os.getenv("WEBAPP_URL", "https://b3k7io-dev.github.io/playerok-tg/")
 ADMIN_IDS = [8325775593]
 
 DB = "playerok.db"
